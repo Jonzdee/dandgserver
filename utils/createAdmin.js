@@ -9,7 +9,7 @@ const createAdmin = async () => {
         await mongoose.connect(process.env.MONGO_URI);
 
         const email = "admin@dandghotel.com";
-        const password = "ChangeThisPassword123!";
+        const password = "admin123";
 
         const existingAdmin = await Admin.findOne({ email });
 
