@@ -27,6 +27,7 @@ const allowedOrigins = [
     "http://localhost:5173",
     "http://localhost:3000",
     "https://your-frontend.vercel.app",
+    "https://www.dandghotel.com",
 ];
 app.use(
     cors({
@@ -43,17 +44,6 @@ app.use(
 // Parse JSON
 app.use(express.json());
 
-// Rate limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: {
-        success: false,
-        message: "Too many requests. Please try again later.",
-    },
-});
-
-app.use("/api", limiter);
 
 // Test route
 app.get("/", (req, res) => {
