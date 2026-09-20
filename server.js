@@ -12,7 +12,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const foodRoutes = require("./routes/foodRoutes");
 const drinkRoutes = require("./routes/drinkRoutes");
-
+const reviewRoutes = require("./routes/reviewRoutes");
 
 
 connectDB();
@@ -41,8 +41,8 @@ app.use(
     })
 );
 // Parse JSON
-app.use(express.json());
-
+app.set("trust proxy", 1);      // right after `const app = express();`
+app.use(express.json({ limit: "10kb" }));   // replaces your current express.json()
 
 // Test route
 app.get("/", (req, res) => {
@@ -55,6 +55,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/food", foodRoutes);
 app.use("/api/drinks", drinkRoutes);
+app.use("/api/reviews", reviewRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
