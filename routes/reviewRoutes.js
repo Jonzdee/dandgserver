@@ -5,7 +5,7 @@ const Review = require("../models/Review");
 
 // ⚠️ Use the same admin-auth middleware your adminRoutes already uses.
 // Adjust this path/name to match your project.
-const { protect } = require("../middleware/authMiddleware");
+const  protect  = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
