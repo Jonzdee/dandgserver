@@ -3,9 +3,8 @@ const mongoose = require("mongoose");
 const rateLimit = require("express-rate-limit");
 const Review = require("../models/Review");
 
-// ⚠️ Use the same admin-auth middleware your adminRoutes already uses.
-// Adjust this path/name to match your project.
-const  protect  = require("../middleware/authMiddleware");
+// Same admin-auth middleware your adminRoutes uses
+const protect = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -33,7 +32,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-// POST /api/reviews  -> saved as "pending" until approved
+// POST /api/reviews  -> auto-approved, goes live immediately
 router.post("/", submitLimiter, async (req, res) => {
     try {
         const { name, location, rating, quote, website } = req.body || {};
@@ -55,15 +54,26 @@ router.post("/", submitLimiter, async (req, res) => {
             return res.status(400).json({ error: "Rating must be between 1 and 5." });
         }
 
-        await Review.create({
+        const review = await Review.create({
             name,
             location: location && location.trim() ? location : "Nigeria",
             rating: r,
             quote,
-            status: "pending",
+            status: "approved", // auto-approve
         });
 
-        res.status(201).json({ ok: true });
+        // Return the saved review so the site can show it straight away
+        res.status(201).json({
+            ok: true,
+            review: {
+                _id: review._id,
+                name: review.name,
+                location: review.location,
+                rating: review.rating,
+                quote: review.quote,
+                createdAt: review.createdAt,
+            },
+        });
     } catch (err) {
         if (err.name === "ValidationError") {
             return res.status(400).json({ error: "Please check your name and review length." });
@@ -75,6 +85,7 @@ router.post("/", submitLimiter, async (req, res) => {
 
 /* ---------- Admin (moderation) ---------- */
 
+// GET /api/reviews/admin/all?status=approved
 router.get("/admin/all", protect, async (req, res) => {
     const filter = ["pending", "approved"].includes(req.query.status)
         ? { status: req.query.status }
@@ -89,7 +100,7 @@ router.patch("/admin/:id/approve", protect, async (req, res) => {
     doc ? res.json(doc) : res.status(404).json({ error: "Not found" });
 });
 
-// DELETE /api/reviews/admin/:id
+// DELETE /api/reviews/admin/:id  (use this to remove spam or abusive reviews)
 router.delete("/admin/:id", protect, async (req, res) => {
     if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ error: "Bad id" });
     const doc = await Review.findByIdAndDelete(req.params.id);
