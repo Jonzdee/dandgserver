@@ -69,13 +69,12 @@ router.post("/", submitLimiter, async (req, res) => {
             return res.status(400).json({ error: "Please check your name and review length." });
         }
         console.error(err);
-        res.status(500).json({ error: "Could not save review." });
+        res.status(500).json({ error: "Could not save review try again." });
     }
 });
 
 /* ---------- Admin (moderation) ---------- */
 
-// GET /api/reviews/admin/all?status=pending
 router.get("/admin/all", protect, async (req, res) => {
     const filter = ["pending", "approved"].includes(req.query.status)
         ? { status: req.query.status }
